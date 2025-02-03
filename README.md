@@ -16,8 +16,10 @@ Adalah aplikasi kriptografi berbasis web menggunakan algoritma ChaCha20-Poly1305
 
 
 ## Dependencies
-- DaisyUI 
-- Talwind
+- Laravel v11.0
+- Vue v3.4.0
+- DaisyUI v5.0
+- Talwind v4.0
 
 ## License
 
