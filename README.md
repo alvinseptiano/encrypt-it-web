@@ -2,7 +2,7 @@
 
 ## Tentang Encrypt It
 
-Adalah aplikasi kriptografi berbasis web menggunakan algoritma ChaCha20-Poly1305, dengan fitur seperti:
+Adalah aplikasi kriptografi berbasis web menggunakan algoritma [ChaCha20-Poly1305](https://tools.ietf.org/html/rfc8439), dengan fitur seperti:
 
 - Enkripsi dan dekripsi file.
 - File storage.
