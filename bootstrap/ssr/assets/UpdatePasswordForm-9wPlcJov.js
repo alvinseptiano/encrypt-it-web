@@ -1,6 +1,7 @@
 import { ref, unref, withCtx, createTextVNode, useSSRContext } from "vue";
 import { ssrRenderAttrs, ssrRenderComponent } from "vue/server-renderer";
-import { _ as _sfc_main$1, a as _sfc_main$2, b as _sfc_main$3 } from "./TextInput-Dg4nfphw.js";
+import { _ as _sfc_main$3 } from "./InputError-D7Pvlg8p.js";
+import { _ as _sfc_main$1, a as _sfc_main$2 } from "./TextInput-C_DOY57T.js";
 import { P as PrimaryButton } from "./PrimaryButton-CbzYxQ0I.js";
 import { useForm } from "@inertiajs/vue3";
 import "./_plugin-vue_export-helper-1tPrXgE0.js";
@@ -16,7 +17,7 @@ const _sfc_main = {
       password_confirmation: ""
     });
     return (_ctx, _push, _parent, _attrs) => {
-      _push(`<section${ssrRenderAttrs(_attrs)}><header><h2 class="text-lg font-medium">Update Password</h2><p class="mt-1 text-sm"> Ensure your account is using a long, random password to stay secure. </p></header><form class="mt-6 space-y-6"><div>`);
+      _push(`<section${ssrRenderAttrs(_attrs)}><header><h2 class="text-lg font-medium">Update Password</h2></header><form class="mt-6 space-y-6"><div>`);
       _push(ssrRenderComponent(_sfc_main$1, {
         for: "current_password",
         value: "Current Password"

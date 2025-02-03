@@ -4,12 +4,12 @@ import { Head, router } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import {
     DocumentIcon,
-    FolderOpenIcon,
     EllipsisVerticalIcon,
     ArrowDownCircleIcon,
     TrashIcon,
     MagnifyingGlassCircleIcon,
     LockClosedIcon,
+    XCircleIcon,
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -20,22 +20,28 @@ const props = defineProps({
     },
 });
 
-// Local state for items
+// Local state
 const fileItems = ref([]);
 const searchQuery = ref('');
 const selectedItems = ref([]);
 
-const filteredItems = computed(() => {
-    if (!searchQuery.value) {
-        return fileItems.value;
-    }
+const downloadQueue = ref([]);
+const currentDownload = ref(null);
+const decryptionKey = ref('');
+const decryptionNonce = ref('');
+const isDownloading = ref(false);
+const downloadError = ref('');
 
+// Filtered items computed property
+const filteredItems = computed(() => {
+    if (!searchQuery.value) return fileItems.value;
     const query = searchQuery.value.toLowerCase();
     return fileItems.value.filter((item) =>
         item.name.toLowerCase().includes(query),
     );
 });
 
+// Selection handling
 const allSelected = computed(() => {
     return (
         filteredItems.value.length > 0 &&
@@ -44,15 +50,11 @@ const allSelected = computed(() => {
 });
 
 const toggleSelectAll = () => {
-    if (allSelected.value) {
-        selectedItems.value = [];
-    } else {
-        selectedItems.value = [...filteredItems.value];
-    }
+    selectedItems.value = allSelected.value ? [] : [...filteredItems.value];
 };
 
 const toggleSelectItem = (item) => {
-    const index = selectedItems.value.indexOf(item);
+    const index = selectedItems.value.findIndex((i) => i.path === item.path);
     if (index === -1) {
         selectedItems.value.push(item);
     } else {
@@ -60,7 +62,94 @@ const toggleSelectItem = (item) => {
     }
 };
 
-// Methods
+// Download handling
+const addToDownloadQueue = (items) => {
+    const itemsToAdd = Array.isArray(items) ? items : [items];
+
+    itemsToAdd.forEach((item) => {
+        if (
+            !downloadQueue.value.find(
+                (queueItem) => queueItem.path === item.path,
+            )
+        ) {
+            downloadQueue.value.push(item);
+        }
+    });
+
+    if (!isDownloading.value) {
+        processNextDownload();
+    }
+};
+
+const processNextDownload = () => {
+    if (downloadQueue.value.length === 0 || isDownloading.value) return;
+
+    isDownloading.value = true;
+    currentDownload.value = downloadQueue.value[0];
+    document.getElementById('download_modal').showModal();
+};
+
+const handleDownload = async () => {
+    if (!currentDownload.value || !decryptionKey.value) {
+        downloadError.value = 'Please provide a password';
+        return;
+    }
+
+    downloadError.value = '';
+
+    try {
+        const response = await axios.post(
+            '/api/file-manager/download',
+            {
+                path: currentDownload.value.path,
+                passphrase: decryptionKey.value,
+                nonce: decryptionNonce.value,
+                fileName: currentDownload.value.name,
+            },
+            {
+                responseType: 'blob',
+            },
+        );
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = currentDownload.value.name;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        completeCurrentDownload();
+    } catch (error) {
+        downloadError.value =
+            'Download failed. Please check your password and try again.';
+        console.error('Download error:', error);
+    }
+};
+
+const completeCurrentDownload = () => {
+    downloadQueue.value.shift();
+    decryptionKey.value = '';
+    decryptionNonce.value = '';
+    downloadError.value = '';
+    document.getElementById('download_modal').close();
+
+    isDownloading.value = false;
+    if (downloadQueue.value.length > 0) {
+        processNextDownload();
+    }
+};
+
+const skipCurrentDownload = () => {
+    completeCurrentDownload();
+};
+
+onMounted(() => {
+    fileItems.value = props.items;
+    fetchItems();
+});
+
 const fetchItems = async () => {
     try {
         const response = await axios.get(`/api/file-manager?path=${''}`);
@@ -94,17 +183,6 @@ const deleteItems = async (itemsToDelete) => {
     }
 };
 
-const downloadItems = (itemsToDownload) => {
-    itemsToDownload.forEach((item) => {
-        if (item.is_file) {
-            window.open(
-                `/api/file-manager/download/${encodeURIComponent(item.path)}`,
-                '_blank',
-            );
-        }
-    });
-};
-
 const formatSize = (bytes) => {
     const units = ['B', 'KB', 'MB', 'GB'];
     let size = bytes;
@@ -121,56 +199,51 @@ const formatSize = (bytes) => {
 const formatDate = (timestamp) => {
     return new Date(timestamp * 1000).toLocaleString();
 };
-
-onMounted(() => {
-    // Initialize with props data if available
-    fileItems.value = props.items;
-    // Then fetch fresh data
-    fetchItems();
-});
 </script>
 
 <template>
     <Head title="My Files" />
     <AuthenticatedLayout>
-        <div class="flex h-[85vh] w-full flex-col gap-4">
-            <div>
-                <!-- Searchbar -->
-                <div class="flex justify-center"></div>
-
-                <!-- Mass Action Bar -->
-                <div class="mt-4 flex justify-center gap-2">
-                    <label class="input">
-                        <span class="label">
-                            <MagnifyingGlassCircleIcon class="size-6" />
-                        </span>
-                        <input
-                            v-model="searchQuery"
-                            type="text"
-                            placeholder="Cari.."
-                        />
-                    </label>
-                    <button
-                        v-if="selectedItems.length > 0"
-                        onclick="download_modal.showModal()"
-                        class="btn btn-success"
-                    >
-                        <ArrowDownCircleIcon class="mr-2 size-5" />
-                        Download Selected
-                    </button>
-                    <button
-                        v-if="selectedItems.length > 0"
-                        @click="deleteItems(selectedItems)"
-                        class="btn btn-error"
-                    >
-                        <TrashIcon class="mr-2 size-5" />
-                        Delete Selected
-                    </button>
-                </div>
+        <div class="flex h-full w-full flex-col gap-4">
+            <!-- Searchbar -->
+            <div class="my-4 flex justify-center gap-2">
+                <label class="input">
+                    <span class="label">
+                        <MagnifyingGlassCircleIcon class="size-6" />
+                    </span>
+                    <input
+                        v-model="searchQuery"
+                        type="text"
+                        placeholder="Cari.."
+                    />
+                </label>
+                <!-- Mass Action Bar - Fixed batch download button -->
+                <button
+                    v-if="selectedItems.length > 0"
+                    @click="addToDownloadQueue(selectedItems)"
+                    class="btn btn-success"
+                >
+                    <ArrowDownCircleIcon class="mr-2 size-5" />
+                    Download Selected
+                </button>
+                <button
+                    v-if="selectedItems.length > 0"
+                    @click="deleteItems(selectedItems)"
+                    class="btn btn-error"
+                >
+                    <TrashIcon class="mr-2 size-5" />
+                    Delete Selected
+                </button>
             </div>
 
+            <div
+                v-if="filteredItems.length === 0"
+                class="justify-center pt-30 text-center text-3xl font-bold"
+            >
+                Tidak ada file
+            </div>
             <!-- Files and Folders List -->
-            <div class="flex-1 overflow-auto">
+            <div v-else class="h-[85vh] flex-1 overflow-auto">
                 <table
                     class="table-pin-rows table-pin-cols table-sm table w-full"
                 >
@@ -227,7 +300,7 @@ onMounted(() => {
                                 class="max-w-[250px] cursor-pointer truncate py-4 text-ellipsis whitespace-nowrap"
                             >
                                 <div class="flex items-center gap-2">
-                                    <span v-if="item.is_encrypted == 'true'">
+                                    <span v-if="item.is_locked">
                                         <LockClosedIcon class="size-5" />
                                     </span>
                                     <span v-else>
@@ -258,7 +331,7 @@ onMounted(() => {
                                         tabindex="0"
                                         class="menu dropdown-content rounded-box bg-base-200 p-2 shadow"
                                     >
-                                        <li v-if="item.is_file">
+                                        <li>
                                             <button
                                                 @click="
                                                     router.get(
@@ -272,9 +345,11 @@ onMounted(() => {
                                                 Inspect
                                             </button>
                                         </li>
-                                        <li v-if="item.is_file">
+                                        <li>
                                             <button
-                                                @click="downloadItems([item])"
+                                                @click="
+                                                    addToDownloadQueue(item)
+                                                "
                                             >
                                                 <ArrowDownCircleIcon
                                                     class="text-success size-5"
@@ -301,52 +376,74 @@ onMounted(() => {
                 </table>
             </div>
         </div>
-
-        <!-- Download modal -->
+        <!-- Download Modal -->
         <dialog id="download_modal" class="modal">
             <div class="modal-box max-w-96">
-                <!-- Modal Header -->
-                <h3 class="mb-4 text-lg font-bold">Download</h3>
+                <form method="dialog">
+                    <button
+                        class="btn btn-sm btn-circle btn-ghost absolute top-2 right-2"
+                        @click="skipCurrentDownload"
+                    >
+                        <XCircleIcon class="size-5" />
+                    </button>
+                </form>
 
-                <!-- Modal Content -->
+                <div class="mb-4">
+                    <h3 class="text-lg font-bold">Download</h3>
+                    <p class="line-clamp-1">{{ currentDownload?.name }}</p>
+                </div>
+
                 <div class="modal-content">
-                    <form method="dialog" class="flex flex-col gap-4">
-                        <!-- Input Fields -->
+                    <form
+                        @submit.prevent="handleDownload"
+                        class="flex flex-col gap-4"
+                    >
                         <div class="flex flex-col gap-4">
-                            <label class="flex flex-col">
-                                <span class="label font-semibold"
-                                    >Passphrase</span
-                                >
+                            <label class="flex flex-col gap-2">
+                                <span>Password</span>
                                 <input
-                                    type="text"
+                                    v-model="decryptionKey"
+                                    type="password"
                                     class="input input-bordered"
-                                    placeholder="Enter your passphrase"
+                                    placeholder="Enter password"
                                     required
                                 />
                             </label>
-                            <label class="flex flex-col">
-                                <span class="label font-semibold">Nonce</span>
+                            <label class="flex flex-col gap-2">
+                                <span>Nonce (Optional)</span>
                                 <input
-                                    type="text"
+                                    v-model="decryptionNonce"
+                                    type="password"
                                     class="input input-bordered"
-                                    placeholder="Enter the nonce in any"
-                                    required
+                                    placeholder="Enter nonce if required"
                                 />
                             </label>
                         </div>
 
-                        <!-- Modal Actions -->
-                        <div class="modal-action flex justify-start gap-4">
-                            <button type="submit" class="btn btn-success">
-                                Download
-                            </button>
-                            <button
-                                type="button"
-                                class="btn btn-error"
-                                onclick="document.getElementById('download_modal').close();"
-                            >
-                                Cancel
-                            </button>
+                        <div v-if="downloadError" class="text-error text-sm">
+                            {{ downloadError }}
+                        </div>
+
+                        <div class="modal-action flex justify-between">
+                            <div class="text-sm text-gray-500">
+                                {{
+                                    downloadQueue.length > 1
+                                        ? `${downloadQueue.length - 1} more files queued`
+                                        : ''
+                                }}
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="submit" class="btn btn-success">
+                                    Download
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn btn-error"
+                                    @click="skipCurrentDownload"
+                                >
+                                    Skip
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>

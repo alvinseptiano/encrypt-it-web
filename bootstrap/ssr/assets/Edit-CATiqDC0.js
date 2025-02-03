@@ -1,13 +1,14 @@
 import { unref, withCtx, createVNode, useSSRContext } from "vue";
 import { ssrRenderComponent } from "vue/server-renderer";
-import { _ as _sfc_main$1 } from "./AuthenticatedLayout-DOO5XuOO.js";
-import _sfc_main$4 from "./DeleteUserForm-DKuPgsN7.js";
-import _sfc_main$3 from "./UpdatePasswordForm-BxySfw41.js";
-import _sfc_main$2 from "./UpdateProfileInformationForm-CUtN6tYX.js";
+import { _ as _sfc_main$1 } from "./AuthenticatedLayout-CUNQJe2q.js";
+import _sfc_main$4 from "./DeleteUserForm-DrswXCa_.js";
+import _sfc_main$3 from "./UpdatePasswordForm-9wPlcJov.js";
+import _sfc_main$2 from "./UpdateProfileInformationForm-0HMAXwKh.js";
 import { Head } from "@inertiajs/vue3";
 import "@heroicons/vue/24/solid";
 import "./_plugin-vue_export-helper-1tPrXgE0.js";
-import "./TextInput-Dg4nfphw.js";
+import "./InputError-D7Pvlg8p.js";
+import "./TextInput-C_DOY57T.js";
 import "./PrimaryButton-CbzYxQ0I.js";
 const _sfc_main = {
   __name: "Edit",
@@ -27,7 +28,7 @@ const _sfc_main = {
       _push(ssrRenderComponent(_sfc_main$1, null, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`<div class="mt-6 flex flex-col gap-4"${_scopeId}><h2 class="divider text-xl font-bold"${_scopeId}>Akun</h2><div class="flex h-full flex-col overflow-auto"${_scopeId}>`);
+            _push2(`<div class="flex flex-col gap-4"${_scopeId}><h2 class="divider text-xl font-bold"${_scopeId}>Edit Akun</h2><div class="flex h-full flex-col overflow-auto"${_scopeId}>`);
             _push2(ssrRenderComponent(_sfc_main$2, {
               "must-verify-email": __props.mustVerifyEmail,
               status: __props.status,
@@ -38,8 +39,8 @@ const _sfc_main = {
             _push2(`</div></div>`);
           } else {
             return [
-              createVNode("div", { class: "mt-6 flex flex-col gap-4" }, [
-                createVNode("h2", { class: "divider text-xl font-bold" }, "Akun"),
+              createVNode("div", { class: "flex flex-col gap-4" }, [
+                createVNode("h2", { class: "divider text-xl font-bold" }, "Edit Akun"),
                 createVNode("div", { class: "flex h-full flex-col overflow-auto" }, [
                   createVNode(_sfc_main$2, {
                     "must-verify-email": __props.mustVerifyEmail,

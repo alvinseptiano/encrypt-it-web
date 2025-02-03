@@ -1,6 +1,6 @@
 import { unref, withCtx, createVNode, useSSRContext } from "vue";
 import { ssrRenderComponent } from "vue/server-renderer";
-import { _ as _sfc_main$1 } from "./AuthenticatedLayout-DOO5XuOO.js";
+import { _ as _sfc_main$1 } from "./AuthenticatedLayout-CUNQJe2q.js";
 import { Head } from "@inertiajs/vue3";
 import "@heroicons/vue/24/solid";
 const _sfc_main = {

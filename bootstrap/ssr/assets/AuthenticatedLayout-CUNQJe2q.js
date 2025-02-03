@@ -1,7 +1,7 @@
 import { mergeProps, unref, withCtx, createVNode, resolveDynamicComponent, openBlock, createBlock, toDisplayString, useSSRContext, ref, onMounted, watch } from "vue";
 import { ssrRenderAttrs, ssrRenderComponent, ssrRenderVNode, ssrRenderClass, ssrInterpolate, ssrIncludeBooleanAttr, ssrRenderSlot } from "vue/server-renderer";
 import { Link, usePage } from "@inertiajs/vue3";
-import { HomeIcon, ArrowUpOnSquareStackIcon, FolderIcon, UserIcon, ExclamationCircleIcon, SunIcon, MoonIcon } from "@heroicons/vue/24/solid";
+import { HomeIcon, ArrowUpOnSquareStackIcon, DocumentDuplicateIcon, UserIcon, ExclamationCircleIcon, SunIcon, MoonIcon } from "@heroicons/vue/24/solid";
 const _sfc_main$3 = {
   __name: "MenuItem",
   __ssrInlineRender: true,
@@ -91,10 +91,10 @@ const _sfc_main$2 = {
         name: "Upload"
       }, null, _parent));
       _push(ssrRenderComponent(_sfc_main$3, {
-        icon: unref(FolderIcon),
+        icon: unref(DocumentDuplicateIcon),
         link: "myfiles",
-        tip: "My File",
-        name: "Folder"
+        tip: "My Files",
+        name: "Files"
       }, null, _parent));
       _push(ssrRenderComponent(_sfc_main$3, {
         icon: unref(UserIcon),
@@ -138,7 +138,7 @@ const _sfc_main$1 = {
     return (_ctx, _push, _parent, _attrs) => {
       _push(`<!--[--><div class="navbar"><div class="navbar-start"><div class="dropdown"><div tabindex="0" role="button" class="btn btn-circle btn-ghost pl-1">`);
       _push(ssrRenderComponent(unref(ExclamationCircleIcon), { class: "h-6 w-6" }, null, _parent));
-      _push(`</div><ul tabindex="0" class="menu dropdown-content rounded-box bg-base-100 z-[1] mt-3 w-52 p-2"><li><button onclick="about_modal.showModal()"> Tentang </button></li></ul></div></div><div class="navbar-center"><a class="btn btn-ghost text-xl">Encrypt it</a></div><div class="navbar-end"><div class="dropdown dropdown-end"><div tabindex="0" role="button" class="btn rounded-btn">${ssrInterpolate(unref(user).name)}</div><ul tabindex="0" class="menu dropdown-content rounded-box bg-base-100 z-[1] mt-4 w-52 p-2"><li><form><button type="submit">Logout</button></form></li></ul></div><label class="swap swap-rotate mx-4"><input type="checkbox" class="theme-controller hidden"${ssrIncludeBooleanAttr(currentTheme.value === "dim") ? " checked" : ""}>`);
+      _push(`</div><ul tabindex="0" class="menu dropdown-content rounded-box bg-base-200 z-[1] mt-3 w-52 p-2"><li><button onclick="about_modal.showModal()"> Tentang </button></li></ul></div></div><div class="navbar-center"><a class="btn btn-ghost text-xl">Encrypt it</a></div><div class="navbar-end"><div class="dropdown dropdown-end"><div tabindex="0" role="button" class="btn rounded-btn">${ssrInterpolate(unref(user).name)}</div><ul tabindex="0" class="menu dropdown-content rounded-box bg-base-200 z-[1] mt-4 w-52 p-2"><li><form><button type="submit">Logout</button></form></li></ul></div><label class="swap swap-rotate mx-4"><input type="checkbox" class="theme-controller hidden"${ssrIncludeBooleanAttr(currentTheme.value === "dim") ? " checked" : ""}>`);
       _push(ssrRenderComponent(unref(SunIcon), { class: "swap-off size-5" }, null, _parent));
       _push(ssrRenderComponent(unref(MoonIcon), { class: "swap-on size-5" }, null, _parent));
       _push(`</label></div></div><dialog id="about_modal" class="modal"><div class="modal-box"><h3 class="text-lg font-bold">Tentang Encrypt It</h3><p class="py-4"> Aplikasi web untuk mengenkripsi dan dekripsi file menggunakan algoritma <b><i>ChaCha20-Poly1305</i></b>. <br><br><cite>Alvin Septiano</cite></p><div class="modal-action"><form method="dialog"><button class="btn">Tutup</button></form></div></div></dialog><!--]-->`);

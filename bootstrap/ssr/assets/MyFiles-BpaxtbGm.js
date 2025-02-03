@@ -1,8 +1,8 @@
 import { ref, computed, onMounted, unref, withCtx, createVNode, withDirectives, vModelText, openBlock, createBlock, createTextVNode, createCommentVNode, Fragment, renderList, toDisplayString, useSSRContext } from "vue";
 import { ssrRenderComponent, ssrRenderAttr, ssrRenderStyle, ssrIncludeBooleanAttr, ssrRenderList, ssrInterpolate } from "vue/server-renderer";
 import { Head, router } from "@inertiajs/vue3";
-import { _ as _sfc_main$1 } from "./AuthenticatedLayout-DOO5XuOO.js";
-import { MagnifyingGlassCircleIcon, ArrowDownCircleIcon, TrashIcon, DocumentIcon, FolderOpenIcon, EllipsisVerticalIcon } from "@heroicons/vue/24/outline";
+import { _ as _sfc_main$1 } from "./AuthenticatedLayout-CUNQJe2q.js";
+import { MagnifyingGlassCircleIcon, ArrowDownCircleIcon, TrashIcon, LockClosedIcon, DocumentIcon, EllipsisVerticalIcon } from "@heroicons/vue/24/outline";
 import "@heroicons/vue/24/solid";
 const _sfc_main = {
   __name: "MyFiles",
@@ -107,11 +107,11 @@ const _sfc_main = {
       _push(ssrRenderComponent(_sfc_main$1, null, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`<div class="flex h-[85vh] w-full flex-col gap-4"${_scopeId}><div${_scopeId}><div class="flex justify-center"${_scopeId}></div><div class="mt-4 flex justify-center gap-2"${_scopeId}><label class="input"${_scopeId}><span class="label"${_scopeId}>`);
+            _push2(`<div class="flex h-[85vh] w-full flex-col gap-4"${_scopeId}><div${_scopeId}><div class="mt-4 flex justify-center gap-2"${_scopeId}><label class="input"${_scopeId}><span class="label"${_scopeId}>`);
             _push2(ssrRenderComponent(unref(MagnifyingGlassCircleIcon), { class: "size-6" }, null, _parent2, _scopeId));
             _push2(`</span><input${ssrRenderAttr("value", searchQuery.value)} type="text" placeholder="Cari.."${_scopeId}></label>`);
             if (selectedItems.value.length > 0) {
-              _push2(`<button class="btn btn-success"${_scopeId}>`);
+              _push2(`<button onclick="download_modal.showModal()" class="btn btn-success"${_scopeId}>`);
               _push2(ssrRenderComponent(unref(ArrowDownCircleIcon), { class: "mr-2 size-5" }, null, _parent2, _scopeId));
               _push2(` Download Selected </button>`);
             } else {
@@ -124,45 +124,39 @@ const _sfc_main = {
             } else {
               _push2(`<!---->`);
             }
-            _push2(`</div></div><div class="flex-1 overflow-auto"${_scopeId}><table class="table-pin-rows table-pin-cols table-sm table w-full"${_scopeId}><thead class="bg-base-300"${_scopeId}><tr${_scopeId}><th style="${ssrRenderStyle({ "width": "5%" })}"${_scopeId}><input type="checkbox" class="checkbox"${ssrIncludeBooleanAttr(allSelected.value) ? " checked" : ""}${_scopeId}></th><th class="py-3 text-left text-xs font-medium uppercase"${_scopeId}> Name </th><th class="py-3 text-left text-xs font-medium uppercase" style="${ssrRenderStyle({ "width": "10%" })}"${_scopeId}> Size </th><th class="py-3 text-left text-xs font-medium uppercase" style="${ssrRenderStyle({ "width": "10%" })}"${_scopeId}> Last Modified </th><th class="py-3 text-left text-xs font-medium uppercase" style="${ssrRenderStyle({ "width": "5%" })}"${_scopeId}> Actions </th></tr></thead><tbody${_scopeId}><!--[-->`);
-            ssrRenderList(filteredItems.value, (item) => {
-              _push2(`<tr class="hover"${_scopeId}><td${_scopeId}><input type="checkbox" class="checkbox"${ssrIncludeBooleanAttr(selectedItems.value.includes(item)) ? " checked" : ""}${_scopeId}></td><td class="max-w-[250px] cursor-pointer truncate py-4 text-ellipsis whitespace-nowrap"${_scopeId}><div class="flex items-center gap-2"${_scopeId}>`);
-              if (item.is_file) {
-                _push2(`<span${_scopeId}>`);
-                _push2(ssrRenderComponent(unref(DocumentIcon), { class: "size-5" }, null, _parent2, _scopeId));
-                _push2(`</span>`);
-              } else {
-                _push2(`<span${_scopeId}>`);
-                _push2(ssrRenderComponent(unref(FolderOpenIcon), { class: "text-accent size-5" }, null, _parent2, _scopeId));
-                _push2(`</span>`);
-              }
-              _push2(`<span class="tooltip tooltip-bottom"${ssrRenderAttr("data-tooltip", item.name)}${_scopeId}>${ssrInterpolate(item.name)}</span></div></td><td class="py-4 text-sm"${_scopeId}>${ssrInterpolate(item.is_file ? formatSize(item.size) : "-")}</td><td class="py-4 text-sm"${_scopeId}>${ssrInterpolate(item.is_file ? formatDate(item.last_modified) : "-")}</td><td class="py-4 text-sm"${_scopeId}><div class="dropdown dropdown-end"${_scopeId}><button tabindex="0" class="btn btn-ghost"${_scopeId}>`);
-              _push2(ssrRenderComponent(unref(EllipsisVerticalIcon), { class: "size-5" }, null, _parent2, _scopeId));
-              _push2(`</button><ul tabindex="0" class="menu dropdown-content rounded-box bg-base-200 p-2 shadow"${_scopeId}>`);
-              if (item.is_file) {
-                _push2(`<li${_scopeId}><button${_scopeId}>`);
+            _push2(`</div></div>`);
+            if (filteredItems.value.length === 0) {
+              _push2(`<div class="justify-center pt-30 text-center text-3xl font-bold"${_scopeId}> Tidak ada file </div>`);
+            } else {
+              _push2(`<div class="flex-1 overflow-auto"${_scopeId}><table class="table-pin-rows table-pin-cols table-sm table w-full"${_scopeId}><thead class="bg-base-300"${_scopeId}><tr${_scopeId}><th style="${ssrRenderStyle({ "width": "5%" })}"${_scopeId}><input type="checkbox" class="checkbox"${ssrIncludeBooleanAttr(allSelected.value) ? " checked" : ""}${_scopeId}></th><th class="py-3 text-left text-xs font-medium uppercase"${_scopeId}> Name </th><th class="py-3 text-left text-xs font-medium uppercase" style="${ssrRenderStyle({ "width": "10%" })}"${_scopeId}> Size </th><th class="py-3 text-left text-xs font-medium uppercase" style="${ssrRenderStyle({ "width": "10%" })}"${_scopeId}> Last Modified </th><th class="py-3 text-left text-xs font-medium uppercase" style="${ssrRenderStyle({ "width": "5%" })}"${_scopeId}> Actions </th></tr></thead><tbody${_scopeId}><!--[-->`);
+              ssrRenderList(filteredItems.value, (item) => {
+                _push2(`<tr class="hover"${_scopeId}><td${_scopeId}><input type="checkbox" class="checkbox"${ssrIncludeBooleanAttr(selectedItems.value.includes(item)) ? " checked" : ""}${_scopeId}></td><td class="max-w-[250px] cursor-pointer truncate py-4 text-ellipsis whitespace-nowrap"${_scopeId}><div class="flex items-center gap-2"${_scopeId}>`);
+                if (item.is_encrypted) {
+                  _push2(`<span${_scopeId}>`);
+                  _push2(ssrRenderComponent(unref(LockClosedIcon), { class: "size-5" }, null, _parent2, _scopeId));
+                  _push2(`</span>`);
+                } else {
+                  _push2(`<span${_scopeId}>`);
+                  _push2(ssrRenderComponent(unref(DocumentIcon), { class: "text-accent size-5" }, null, _parent2, _scopeId));
+                  _push2(`</span>`);
+                }
+                _push2(`<span class="tooltip tooltip-bottom"${ssrRenderAttr("data-tooltip", item.name)}${_scopeId}>${ssrInterpolate(item.name)}</span></div></td><td class="py-4 text-sm"${_scopeId}>${ssrInterpolate(formatSize(item.size))}</td><td class="py-4 text-sm"${_scopeId}>${ssrInterpolate(formatDate(item.last_modified))}</td><td class="py-4 text-sm"${_scopeId}><div class="dropdown dropdown-end"${_scopeId}><button tabindex="0" class="btn btn-ghost"${_scopeId}>`);
+                _push2(ssrRenderComponent(unref(EllipsisVerticalIcon), { class: "size-5" }, null, _parent2, _scopeId));
+                _push2(`</button><ul tabindex="0" class="menu dropdown-content rounded-box bg-base-200 p-2 shadow"${_scopeId}><li${_scopeId}><button${_scopeId}>`);
                 _push2(ssrRenderComponent(unref(MagnifyingGlassCircleIcon), { class: "text-info size-5" }, null, _parent2, _scopeId));
-                _push2(` Inspect </button></li>`);
-              } else {
-                _push2(`<!---->`);
-              }
-              if (item.is_file) {
-                _push2(`<li${_scopeId}><button${_scopeId}>`);
+                _push2(` Inspect </button></li><li${_scopeId}><button${_scopeId}>`);
                 _push2(ssrRenderComponent(unref(ArrowDownCircleIcon), { class: "text-success size-5" }, null, _parent2, _scopeId));
-                _push2(` Download </button></li>`);
-              } else {
-                _push2(`<!---->`);
-              }
-              _push2(`<li${_scopeId}><button class="text-error"${_scopeId}>`);
-              _push2(ssrRenderComponent(unref(TrashIcon), { class: "text-error size-5" }, null, _parent2, _scopeId));
-              _push2(` Delete </button></li></ul></div></td></tr>`);
-            });
-            _push2(`<!--]--></tbody></table></div></div>`);
+                _push2(` Download </button></li><li${_scopeId}><button class="text-error"${_scopeId}>`);
+                _push2(ssrRenderComponent(unref(TrashIcon), { class: "text-error size-5" }, null, _parent2, _scopeId));
+                _push2(` Delete </button></li></ul></div></td></tr>`);
+              });
+              _push2(`<!--]--></tbody></table></div>`);
+            }
+            _push2(`</div><dialog id="download_modal" class="modal"${_scopeId}><div class="modal-box max-w-96"${_scopeId}><h3 class="mb-4 text-lg font-bold"${_scopeId}>Download</h3><div class="modal-content"${_scopeId}><form method="dialog" class="flex flex-col gap-4"${_scopeId}><div class="flex flex-col gap-4"${_scopeId}><label class="flex flex-col"${_scopeId}><span class="label font-semibold"${_scopeId}>Passphrase</span><input type="text" class="input input-bordered" placeholder="Enter your passphrase" required${_scopeId}></label><label class="flex flex-col"${_scopeId}><span class="label font-semibold"${_scopeId}>Nonce</span><input type="text" class="input input-bordered" placeholder="Enter the nonce in any" required${_scopeId}></label></div><div class="modal-action flex justify-start gap-4"${_scopeId}><button type="submit" class="btn btn-success"${_scopeId}> Download </button><button type="button" class="btn btn-error" onclick="document.getElementById(&#39;download_modal&#39;).close();"${_scopeId}> Cancel </button></div></form></div></div></dialog>`);
           } else {
             return [
               createVNode("div", { class: "flex h-[85vh] w-full flex-col gap-4" }, [
                 createVNode("div", null, [
-                  createVNode("div", { class: "flex justify-center" }),
                   createVNode("div", { class: "mt-4 flex justify-center gap-2" }, [
                     createVNode("label", { class: "input" }, [
                       createVNode("span", { class: "label" }, [
@@ -178,12 +172,12 @@ const _sfc_main = {
                     ]),
                     selectedItems.value.length > 0 ? (openBlock(), createBlock("button", {
                       key: 0,
-                      onClick: ($event) => downloadItems(selectedItems.value),
+                      onclick: "download_modal.showModal()",
                       class: "btn btn-success"
                     }, [
                       createVNode(unref(ArrowDownCircleIcon), { class: "mr-2 size-5" }),
                       createTextVNode(" Download Selected ")
-                    ], 8, ["onClick"])) : createCommentVNode("", true),
+                    ])) : createCommentVNode("", true),
                     selectedItems.value.length > 0 ? (openBlock(), createBlock("button", {
                       key: 1,
                       onClick: ($event) => deleteItems(selectedItems.value),
@@ -194,7 +188,13 @@ const _sfc_main = {
                     ], 8, ["onClick"])) : createCommentVNode("", true)
                   ])
                 ]),
-                createVNode("div", { class: "flex-1 overflow-auto" }, [
+                filteredItems.value.length === 0 ? (openBlock(), createBlock("div", {
+                  key: 0,
+                  class: "justify-center pt-30 text-center text-3xl font-bold"
+                }, " Tidak ada file ")) : (openBlock(), createBlock("div", {
+                  key: 1,
+                  class: "flex-1 overflow-auto"
+                }, [
                   createVNode("table", { class: "table-pin-rows table-pin-cols table-sm table w-full" }, [
                     createVNode("thead", { class: "bg-base-300" }, [
                       createVNode("tr", null, [
@@ -237,10 +237,10 @@ const _sfc_main = {
                           ]),
                           createVNode("td", { class: "max-w-[250px] cursor-pointer truncate py-4 text-ellipsis whitespace-nowrap" }, [
                             createVNode("div", { class: "flex items-center gap-2" }, [
-                              item.is_file ? (openBlock(), createBlock("span", { key: 0 }, [
-                                createVNode(unref(DocumentIcon), { class: "size-5" })
+                              item.is_encrypted ? (openBlock(), createBlock("span", { key: 0 }, [
+                                createVNode(unref(LockClosedIcon), { class: "size-5" })
                               ])) : (openBlock(), createBlock("span", { key: 1 }, [
-                                createVNode(unref(FolderOpenIcon), { class: "text-accent size-5" })
+                                createVNode(unref(DocumentIcon), { class: "text-accent size-5" })
                               ])),
                               createVNode("span", {
                                 class: "tooltip tooltip-bottom",
@@ -248,8 +248,8 @@ const _sfc_main = {
                               }, toDisplayString(item.name), 9, ["data-tooltip"])
                             ])
                           ]),
-                          createVNode("td", { class: "py-4 text-sm" }, toDisplayString(item.is_file ? formatSize(item.size) : "-"), 1),
-                          createVNode("td", { class: "py-4 text-sm" }, toDisplayString(item.is_file ? formatDate(item.last_modified) : "-"), 1),
+                          createVNode("td", { class: "py-4 text-sm" }, toDisplayString(formatSize(item.size)), 1),
+                          createVNode("td", { class: "py-4 text-sm" }, toDisplayString(formatDate(item.last_modified)), 1),
                           createVNode("td", { class: "py-4 text-sm" }, [
                             createVNode("div", { class: "dropdown dropdown-end" }, [
                               createVNode("button", {
@@ -262,7 +262,7 @@ const _sfc_main = {
                                 tabindex: "0",
                                 class: "menu dropdown-content rounded-box bg-base-200 p-2 shadow"
                               }, [
-                                item.is_file ? (openBlock(), createBlock("li", { key: 0 }, [
+                                createVNode("li", null, [
                                   createVNode("button", {
                                     onClick: ($event) => unref(router).get(
                                       `/hextable/${encodeURIComponent(item.path)}`
@@ -271,15 +271,15 @@ const _sfc_main = {
                                     createVNode(unref(MagnifyingGlassCircleIcon), { class: "text-info size-5" }),
                                     createTextVNode(" Inspect ")
                                   ], 8, ["onClick"])
-                                ])) : createCommentVNode("", true),
-                                item.is_file ? (openBlock(), createBlock("li", { key: 1 }, [
+                                ]),
+                                createVNode("li", null, [
                                   createVNode("button", {
                                     onClick: ($event) => downloadItems([item])
                                   }, [
                                     createVNode(unref(ArrowDownCircleIcon), { class: "text-success size-5" }),
                                     createTextVNode(" Download ")
                                   ], 8, ["onClick"])
-                                ])) : createCommentVNode("", true),
+                                ]),
                                 createVNode("li", null, [
                                   createVNode("button", {
                                     onClick: ($event) => deleteItems([item]),
@@ -294,6 +294,52 @@ const _sfc_main = {
                           ])
                         ]);
                       }), 128))
+                    ])
+                  ])
+                ]))
+              ]),
+              createVNode("dialog", {
+                id: "download_modal",
+                class: "modal"
+              }, [
+                createVNode("div", { class: "modal-box max-w-96" }, [
+                  createVNode("h3", { class: "mb-4 text-lg font-bold" }, "Download"),
+                  createVNode("div", { class: "modal-content" }, [
+                    createVNode("form", {
+                      method: "dialog",
+                      class: "flex flex-col gap-4"
+                    }, [
+                      createVNode("div", { class: "flex flex-col gap-4" }, [
+                        createVNode("label", { class: "flex flex-col" }, [
+                          createVNode("span", { class: "label font-semibold" }, "Passphrase"),
+                          createVNode("input", {
+                            type: "text",
+                            class: "input input-bordered",
+                            placeholder: "Enter your passphrase",
+                            required: ""
+                          })
+                        ]),
+                        createVNode("label", { class: "flex flex-col" }, [
+                          createVNode("span", { class: "label font-semibold" }, "Nonce"),
+                          createVNode("input", {
+                            type: "text",
+                            class: "input input-bordered",
+                            placeholder: "Enter the nonce in any",
+                            required: ""
+                          })
+                        ])
+                      ]),
+                      createVNode("div", { class: "modal-action flex justify-start gap-4" }, [
+                        createVNode("button", {
+                          type: "submit",
+                          class: "btn btn-success"
+                        }, " Download "),
+                        createVNode("button", {
+                          type: "button",
+                          class: "btn btn-error",
+                          onclick: "document.getElementById('download_modal').close();"
+                        }, " Cancel ")
+                      ])
                     ])
                   ])
                 ])

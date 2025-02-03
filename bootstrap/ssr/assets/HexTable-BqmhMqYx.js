@@ -1,9 +1,10 @@
-import { ref, onMounted, withCtx, unref, createVNode, createTextVNode, toDisplayString, openBlock, createBlock, Fragment, renderList, createCommentVNode, useSSRContext } from "vue";
+import { ref, onMounted, withCtx, createTextVNode, unref, createVNode, toDisplayString, openBlock, createBlock, Fragment, renderList, createCommentVNode, useSSRContext } from "vue";
 import { ssrRenderComponent, ssrInterpolate, ssrRenderList } from "vue/server-renderer";
-import { _ as _sfc_main$1 } from "./AuthenticatedLayout-DOO5XuOO.js";
+import { _ as _sfc_main$1 } from "./AuthenticatedLayout-CUNQJe2q.js";
 import { usePage, router } from "@inertiajs/vue3";
 import axios from "axios";
 import { ArrowLeftIcon, DocumentIcon } from "@heroicons/vue/24/solid";
+import { _ as _sfc_main$2 } from "./Heading-BV5XIhQ-.js";
 const _sfc_main = {
   __name: "HexTable",
   __ssrInlineRender: true,
@@ -66,7 +67,20 @@ const _sfc_main = {
       _push(ssrRenderComponent(_sfc_main$1, _attrs, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`<div class="flex h-[85vh] w-full flex-col"${_scopeId}><div class="bg-base-200 flex justify-between overflow-hidden rounded-lg p-4"${_scopeId}><button class="btn btn-ghost gap-2"${_scopeId}>`);
+            _push2(`<div class="flex h-[85vh] w-full flex-col"${_scopeId}>`);
+            _push2(ssrRenderComponent(_sfc_main$2, null, {
+              default: withCtx((_2, _push3, _parent3, _scopeId2) => {
+                if (_push3) {
+                  _push3(`Hex`);
+                } else {
+                  return [
+                    createTextVNode("Hex")
+                  ];
+                }
+              }),
+              _: 1
+            }, _parent2, _scopeId));
+            _push2(`<div class="bg-base-200 flex justify-between overflow-hidden rounded-lg p-4"${_scopeId}><button class="btn btn-ghost gap-2"${_scopeId}>`);
             _push2(ssrRenderComponent(unref(ArrowLeftIcon), { class: "size-5" }, null, _parent2, _scopeId));
             _push2(` Back </button><div class="flex items-center gap-2"${_scopeId}>`);
             _push2(ssrRenderComponent(unref(DocumentIcon), { class: "size-5" }, null, _parent2, _scopeId));
@@ -104,6 +118,12 @@ const _sfc_main = {
           } else {
             return [
               createVNode("div", { class: "flex h-[85vh] w-full flex-col" }, [
+                createVNode(_sfc_main$2, null, {
+                  default: withCtx(() => [
+                    createTextVNode("Hex")
+                  ]),
+                  _: 1
+                }),
                 createVNode("div", { class: "bg-base-200 flex justify-between overflow-hidden rounded-lg p-4" }, [
                   createVNode("button", {
                     onClick: goBack,

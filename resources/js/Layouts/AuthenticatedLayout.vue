@@ -27,9 +27,11 @@ watch(isOpen, (newValue) => {
         </div>
 
         <!-- Main Content Wrapper -->
-        <div class="flex h-full flex-col gap-4 overflow-auto pt-20 md:pl-20">
+        <div
+            class="mt-5 flex h-full flex-col gap-4 overflow-auto pt-10 md:pl-20"
+        >
             <!-- Main Content with proper padding -->
-            <main class="flex-1 p-8 pb-28 md:ml-4 md:pb-8 md:pl-4">
+            <main class="h-full w-full flex-1 p-8 md:ml-4 md:pb-8 md:pl-4">
                 <slot />
             </main>
 

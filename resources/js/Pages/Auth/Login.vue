@@ -32,9 +32,6 @@ const submit = () => {
 <template>
     <GuestLayout>
         <Head title="Log in" />
-        <div v-if="$page.props.flash.message" class="alert">
-            {{ $page.props.flash.message }}
-        </div>
         <div v-if="status" class="mb-4 text-sm font-medium">
             {{ status }}
         </div>
@@ -58,7 +55,6 @@ const submit = () => {
                             required
                             autofocus
                         />
-
                         <label class="fieldset-label">Password</label>
                         <input
                             id="password"
@@ -69,6 +65,7 @@ const submit = () => {
                             autocomplete="current-password"
                             required
                         />
+                        <InputError class="mt-2" :message="form.errors.email" />
                         <InputError
                             class="mt-2"
                             :message="form.errors.password"

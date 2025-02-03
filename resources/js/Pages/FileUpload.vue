@@ -1,12 +1,12 @@
 <script setup>
 import axios from 'axios';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Heading from '@/Components/Heading.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { TrashIcon } from '@heroicons/vue/24/solid';
-// import Checkbox from '@/Components/Checkbox.vue';
 
+const CHUNK_SIZE = 1024 * 1024 * 2; // 2MB chunks
 const loading = ref(false);
 const success = ref(false);
 const error = ref(null);
@@ -17,8 +17,13 @@ const startTime = ref(null);
 const processingTime = ref(0);
 const uploadSpeed = ref(0);
 const estimatedTimeRemaining = ref(0);
+const isSameAsPassword = ref(false);
+const currentChunk = ref(0);
+const totalChunks = ref(0);
+const activeFile = ref(null);
 
 const emit = defineEmits(['upload-success']);
+const page = usePage();
 
 onMounted(() => {
     const token = document.querySelector('meta[name="csrf-token"]')?.content;
@@ -31,7 +36,25 @@ const form = useForm({
     files: [], // Holds the files for upload
     passphrase: '',
     nonce: '',
+    is_encrypted: false,
+    is_same_as_password: false,
+    user_id: page.props.auth.user.id,
 });
+
+const getFileType = (file) => {
+    const fileType = file.type;
+    if (fileType.startsWith('image/')) {
+        return 'image';
+    } else if (
+        fileType.startsWith('application/') ||
+        fileType === 'text/plain'
+    ) {
+        return 'document';
+    } else if (fileType.startsWith('video/')) {
+        return 'video';
+    }
+    return 'unknown'; // Default type if none matches
+};
 
 const formatTime = (seconds) => {
     if (seconds < 60) {
@@ -85,49 +108,138 @@ const removeFile = (index) => {
     estimatedTimeRemaining.value = null;
 };
 
+const uploadChunk = async (file, chunkIndex, fileId) => {
+    console.log('upload chunk');
+    const start = chunkIndex * CHUNK_SIZE;
+    const end = Math.min(start + CHUNK_SIZE, file.size);
+    const chunk = file.slice(start, end);
+
+    const formData = new FormData();
+    formData.append('chunk', chunk);
+    formData.append('fileName', file.name);
+    formData.append('fileId', fileId);
+    formData.append('chunkIndex', chunkIndex);
+    formData.append('totalChunks', totalChunks.value);
+    // Convert boolean values to 0/1 for tinyInt
+    formData.append('is_encrypted', form.is_encrypted ? 1 : 0);
+    formData.append('is_same_as_password', form.is_same_as_password ? 1 : 0);
+    formData.append('passphrase', form.passphrase);
+    formData.append('nonce', form.nonce);
+
+    try {
+        await axios.post('/api/file-manager/upload-chunk', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+            onUploadProgress: (progressEvent) => {
+                const currentTime = Date.now();
+                const overallProgress =
+                    ((chunkIndex * CHUNK_SIZE + progressEvent.loaded) /
+                        file.size) *
+                    100;
+                progress.value = Math.min(Math.round(overallProgress), 99);
+
+                uploadSpeed.value = calculateSpeed(
+                    progressEvent.loaded,
+                    currentTime - startTime.value,
+                );
+
+                const remainingBytes =
+                    file.size -
+                    (chunkIndex * CHUNK_SIZE + progressEvent.loaded);
+                const bytesPerSecond =
+                    progressEvent.loaded /
+                    ((currentTime - startTime.value) / 1000);
+                estimatedTimeRemaining.value = remainingBytes / bytesPerSecond;
+            },
+        });
+
+        return true;
+    } catch (error) {
+        console.error('Chunk upload failed:', error);
+        return false;
+    }
+};
+
 const uploadFile = async () => {
     if (!form.files.length) return;
 
     uploading.value = true;
     loading.value = true;
+    startTime.value = Date.now();
 
-    form.post('/api/file-manager/upload', {
-        onUploadProgress: (progressEvent) => {
-            progress.value = Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total,
-            );
-            const currentTime = Date.now();
-            const elapsed = (currentTime - startTime.value) / 1000; // seconds
-            progress.value = Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total,
-            );
+    for (const file of form.files) {
+        activeFile.value = file;
+        const fileId =
+            Date.now() + '-' + Math.random().toString(36).substring(2, 9);
+        totalChunks.value = Math.ceil(file.size / CHUNK_SIZE);
+        currentChunk.value = 0;
+        // form.is_encrypted = true;
 
-            // Calculate upload speed
-            uploadSpeed.value = calculateSpeed(
-                progressEvent.loaded,
-                currentTime - startTime.value,
-            );
+        // Set encryption flags with proper boolean conversion
+        form.is_encrypted = Boolean(form.passphrase.length > 0);
+        //     (form.passphrase.length > 0 && form.nonce.length > 0) ||
+        //         isSameAsPassword.value,
+        // );
 
-            // Calculate ETA
-            const remainingBytes = progressEvent.total - progressEvent.loaded;
-            const bytesPerSecond = progressEvent.loaded / elapsed;
-            estimatedTimeRemaining.value = remainingBytes / bytesPerSecond;
-        },
-        preserveScroll: true, // Prevent scrolling on submission
-        onFinish: () => {
-            uploading.value = false;
-            progress.value = 0;
-            fileInput.value.value = ''; // Reset file input
-            form.reset(); // Clear the form after submission
-            success.value = true;
+        // form.is_same_as_password = Boolean(isSameAsPassword.value);
+
+        while (currentChunk.value < totalChunks.value) {
+            const success = await uploadChunk(file, currentChunk.value, fileId);
+            if (!success) {
+                error.value = `Failed to upload chunk ${currentChunk.value} of ${file.name}`;
+                loading.value = false;
+                uploading.value = false;
+                return;
+            }
+            currentChunk.value++;
+        }
+
+        // Determine file type
+        const fileType = getFileType(file);
+
+        // Finalize the file upload with proper boolean values and file type
+        try {
+            await axios.post('/api/file-manager/finalize-upload', {
+                fileName: file.name,
+                fileId: fileId,
+                type: fileType, // Add file type here
+                is_encrypted: form.is_encrypted ? 1 : 0,
+                is_same_as_password: form.is_same_as_password ? 1 : 0,
+                user_id: page.props.auth.user.id,
+                passphrase: form.passphrase,
+                nonce: form.nonce,
+            });
+        } catch (error) {
+            console.error('Failed to finalize upload:', error);
+            error.value = `Failed to finalize upload of ${file.name}`;
             loading.value = false;
-            emit('upload-success', []);
+            uploading.value = false;
+            return;
+        }
+    }
 
-            // Calculate total processing time
-            processingTime.value = (Date.now() - startTime.value) / 1000;
-        },
-    });
+    // Reset form after successful upload
+    uploading.value = false;
+    progress.value = 0;
+    fileInput.value.value = '';
+    form.reset();
+    form.files = [];
+    success.value = true;
+    loading.value = false;
+    emit('upload-success', []);
+    processingTime.value = (Date.now() - startTime.value) / 1000;
 };
+
+watch(
+    () => isSameAsPassword.value, // Watching the reactive variable
+    (newValue) => {
+        if (newValue) {
+            form.passphrase = ''; // Clear the passphrase
+            form.nonce = ''; // Clear the nonce
+        }
+    },
+);
 </script>
 
 <template>
@@ -138,28 +250,37 @@ const uploadFile = async () => {
             <!-- Parent Container for Form and Selected Files -->
             <div class="flex flex-col gap-8 overflow-auto md:flex-row">
                 <!-- Form Section -->
-                <div class="flex flex-1 flex-col gap-4 pt-2 pl-2">
+                <div class="flex flex-1 flex-col gap-5 pt-2 pl-2">
                     <label class="input">
                         <span class="label min-w-24">Passphrase</span>
                         <input
                             type="text"
                             id="passphrase"
                             v-model="form.passphrase"
-                            :disabled="!form.files.length"
+                            :disabled="
+                                form.files.length === 0 || isSameAsPassword
+                            "
                             placeholder=". . . ."
+                            required
                         />
                     </label>
                     <label class="input">
                         <span class="label min-w-24">Nonce</span>
                         <input
-                            class=""
-                            type="text"
+                            type="number"
                             id="nonce"
                             v-model="form.nonce"
-                            :disabled="!form.files.length"
+                            :disabled="
+                                form.files.length === 0 || isSameAsPassword
+                            "
                             placeholder=". . . ."
+                            required
                         />
+                        <span class="badge badge-neutral badge-xs"
+                            >Opsional</span
+                        >
                     </label>
+                    <p class="fieldset-label">Nonce harus dalam bentuk angka</p>
                     <input
                         ref="fileInput"
                         type="file"
@@ -167,37 +288,27 @@ const uploadFile = async () => {
                         class="file-input file-input-bordered"
                         @change="handleFileSelect"
                     />
-                    <form
-                        action="/file-upload"
-                        class="dropzone"
-                        id="my-awesome-dropzone"
-                    />
-
-                    <div class="form-control">
-                        <label class="label cursor-pointer gap-4">
-                            <span class="label-text"
-                                >Samakan dengan password akun</span
-                            >
-                            <input
-                                type="checkbox"
-                                checked="checked"
-                                class="checkbox"
-                            />
-                        </label>
-                    </div>
                     <div class="flex gap-4">
-                        <button class="btn btn-accent w-fit">Upload</button>
                         <button
-                            @click.prevent="uploadFile"
+                            @click.prevent="uploadFile()"
+                            class="btn btn-accent w-fit"
+                            :disabled="form.files.length === 0"
+                        >
+                            Upload
+                        </button>
+                        <button
+                            @click.prevent="uploadFile()"
                             class="btn btn-primary w-fit"
-                            :disabled="form.files.length === 0 || uploading"
+                            :disabled="
+                                form.files.length === 0 ||
+                                (!isSameAsPassword && form.passphrase === '')
+                            "
                         >
                             {{
                                 uploading ? 'Uploading...' : 'Upload & Encrypt'
                             }}
                         </button>
                     </div>
-
                     <!-- Upload Information -->
                     <div class="my-4 flex-1">
                         <div class="bg-base-300 min-h-48 w-full rounded-lg p-4">

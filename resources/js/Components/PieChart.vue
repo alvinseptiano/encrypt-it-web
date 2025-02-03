@@ -6,57 +6,29 @@ import {
     Tooltip,
     Legend,
     ArcElement,
-    PieController, // Import PieController
+    PieController,
 } from 'chart.js';
-import Heading from './Heading.vue';
 
-// Register Chart.js components, including the PieController
 ChartJS.register(Title, Tooltip, Legend, ArcElement, PieController);
 
 const chartCanvas = ref(null);
-const storageData = ref([]);
-const labels = ['Images', 'Videos', 'Documents'];
-const colors = ['#FF6384', '#36A2EB', '#FFCE56'];
-
-const totalStorage = ref(0); // Total storage in bytes
-const usedStorage = ref(0); // Used storage in bytes
-const availableStorage = ref(0); // Available storage in byte
+const storageData = ref([]); // Data for pie chart
+const labels = ['Images', 'Videos', 'Documents']; // Labels for the pie chart
+const colors = ['#FF6384', '#36A2EB', '#FFCE56']; // Colors for each category
 
 const fetchStorageData = async () => {
     try {
-        const response = await fetch('/api/file-manager/storage-sizes');
-        const { usedStorage, availableStorage } = await response.json();
-        usedStorage.value =
-            usedStorage.images + usedStorage.documents + usedStorage.videos;
+        const response = await fetch('/api/file-manager/fileratio');
+        const { filetype } = await response.json();
 
-        // Combine used storage and available storage
-        storageData.value = [
-            // usedStorage.images,
-            // usedStorage.videos,
-            50,
-            30,
-            60,
-            // usedStorage.documents,
-            // availableStorage,
-        ];
+        // Prepare the data for the pie chart
+        storageData.value = Object.values(filetype); // Extract the counts
+        // labels = Object.keys(filetype);               // Extract the file types
 
-        drawChart();
+        drawChart(); // Redraw the chart with new data
     } catch (error) {
         console.error('Failed to fetch storage sizes:', error);
     }
-};
-
-const formatSize = (bytes) => {
-    const units = ['B', 'KB', 'MB', 'GB'];
-    let size = bytes;
-    let unitIndex = 0;
-
-    while (size >= 1024 && unitIndex < units.length - 1) {
-        size /= 1024;
-        unitIndex++;
-    }
-
-    return `${size.toFixed(1)} ${units[unitIndex]}`;
 };
 
 const drawChart = () => {
@@ -74,6 +46,25 @@ const drawChart = () => {
                 },
             ],
         },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (tooltipItem) => {
+                            const value =
+                                storageData.value[tooltipItem.dataIndex];
+                            return value;
+                            // return `${labels[tooltipItem.dataIndex]}: ${formatSize(
+                            //     value,
+                        },
+                    },
+                },
+            },
+        },
     });
 };
 
@@ -86,9 +77,6 @@ onMounted(() => {
 <template>
     <div>
         <canvas ref="chartCanvas"></canvas>
-        <!-- <p>Total Storage: {{ formatSize(totalStorage) }}</p>
-        <p>Used Storage: {{ formatSize(usedStorage) }}</p>
-        <p>Available Storage: {{ formatSize(availableStorage) }}</p> -->
     </div>
 </template>
 

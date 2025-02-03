@@ -13,30 +13,26 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
-})->middleware('auth')->name('dashboard');
+})->name('home');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/hextable/{path}', function ($path) {
-        return Inertia::render('HexTable', [
-            'filePath' => $path
-        ]);
-    })->name('myfiles');
-
     Route::get('/dashboard', function () {
-        return Inertia::render('Home');
+        return Inertia::render('ChartInfo');
     })->name('dashboard');
-
-    Route::get('/hextable', function () {
-        return Inertia::render('HexTable');
-    })->name('hextable');
 
     Route::get('/uploadfile', function () {
         return Inertia::render('FileUpload');
     })->name('uploadfile');
-    
+
     Route::get('/myfiles', function () {
         return Inertia::render('MyFiles');
     })->name('myfiles');
+
+    Route::get('/hextable/{path}', function ($path) {
+        return Inertia::render('HexTable', [
+            'filePath' => $path
+        ]);
+    })->where('path', '.*')->name('hextable');
 
     Route::get('/username', [ProfileController::class, 'get']);
     Route::get('/files', [FileController::class, 'index']);
@@ -45,4 +41,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

@@ -2,7 +2,7 @@
 import MenuItem from '@/Components/MenuItem.vue';
 import {
     UserIcon,
-    FolderIcon,
+    DocumentDuplicateIcon,
     ArrowUpOnSquareStackIcon,
     HomeIcon,
 } from '@heroicons/vue/24/solid';
@@ -22,10 +22,10 @@ import {
         name="Upload"
     />
     <MenuItem
-        :icon="FolderIcon"
+        :icon="DocumentDuplicateIcon"
         :link="'myfiles'"
-        :tip="'My File'"
-        name="Folder"
+        :tip="'My Files'"
+        name="Files"
     />
     <MenuItem
         :icon="UserIcon"

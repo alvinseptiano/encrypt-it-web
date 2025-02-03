@@ -1,27 +1,5 @@
 import { mergeProps, useSSRContext, useModel, ref, onMounted } from "vue";
 import { ssrRenderAttrs, ssrInterpolate, ssrRenderSlot, ssrGetDynamicModelProps } from "vue/server-renderer";
-const _sfc_main$2 = {
-  __name: "InputError",
-  __ssrInlineRender: true,
-  props: {
-    message: {
-      type: String
-    }
-  },
-  setup(__props) {
-    return (_ctx, _push, _parent, _attrs) => {
-      _push(`<div${ssrRenderAttrs(mergeProps({
-        style: __props.message ? null : { display: "none" }
-      }, _attrs))}><p class="text-sm text-red-600 dark:text-red-400">${ssrInterpolate(__props.message)}</p></div>`);
-    };
-  }
-};
-const _sfc_setup$2 = _sfc_main$2.setup;
-_sfc_main$2.setup = (props, ctx) => {
-  const ssrContext = useSSRContext();
-  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("resources/js/Components/InputError.vue");
-  return _sfc_setup$2 ? _sfc_setup$2(props, ctx) : void 0;
-};
 const _sfc_main$1 = {
   __name: "InputLabel",
   __ssrInlineRender: true,
@@ -88,6 +66,5 @@ _sfc_main.setup = (props, ctx) => {
 };
 export {
   _sfc_main$1 as _,
-  _sfc_main as a,
-  _sfc_main$2 as b
+  _sfc_main as a
 };

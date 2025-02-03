@@ -1,9 +1,9 @@
-import { ref, onMounted, withCtx, unref, createTextVNode, createVNode, withDirectives, vModelText, withModifiers, toDisplayString, openBlock, createBlock, createCommentVNode, Fragment, renderList, useSSRContext } from "vue";
-import { ssrRenderComponent, ssrRenderAttr, ssrIncludeBooleanAttr, ssrInterpolate, ssrRenderStyle, ssrRenderList } from "vue/server-renderer";
+import { ref, onMounted, watch, withCtx, unref, createTextVNode, createVNode, withDirectives, vModelText, vModelCheckbox, withModifiers, toDisplayString, openBlock, createBlock, createCommentVNode, Fragment, renderList, useSSRContext } from "vue";
+import { ssrRenderComponent, ssrRenderAttr, ssrIncludeBooleanAttr, ssrLooseContain, ssrInterpolate, ssrRenderStyle, ssrRenderList } from "vue/server-renderer";
 import axios from "axios";
-import { _ as _sfc_main$1 } from "./AuthenticatedLayout-DOO5XuOO.js";
+import { _ as _sfc_main$1 } from "./AuthenticatedLayout-CUNQJe2q.js";
 import { _ as _sfc_main$2 } from "./Heading-BV5XIhQ-.js";
-import { useForm, Head } from "@inertiajs/vue3";
+import { usePage, useForm, Head } from "@inertiajs/vue3";
 import { TrashIcon } from "@heroicons/vue/24/solid";
 const _sfc_main = {
   __name: "FileUpload",
@@ -20,7 +20,9 @@ const _sfc_main = {
     const processingTime = ref(0);
     const uploadSpeed = ref(0);
     const estimatedTimeRemaining = ref(0);
+    const isSameAsPassword = ref(false);
     const emit = __emit;
+    const page = usePage();
     onMounted(() => {
       var _a;
       const token = (_a = document.querySelector('meta[name="csrf-token"]')) == null ? void 0 : _a.content;
@@ -32,7 +34,10 @@ const _sfc_main = {
       files: [],
       // Holds the files for upload
       passphrase: "",
-      nonce: ""
+      nonce: "",
+      is_encrypted: false,
+      is_same_as_password: false,
+      user_id: page.props.auth.user.id
     });
     const formatTime = (seconds) => {
       if (seconds < 60) {
@@ -82,11 +87,11 @@ const _sfc_main = {
       if (!form.files.length) return;
       uploading.value = true;
       loading.value = true;
+      startTime.value = Date.now();
+      form.is_encrypted = form.passphrase.length > 0 && form.nonce.length > 0 || isSameAsPassword.value;
+      form.is_same_as_password = isSameAsPassword.value;
       form.post("/api/file-manager/upload", {
         onUploadProgress: (progressEvent) => {
-          progress.value = Math.round(
-            progressEvent.loaded * 100 / progressEvent.total
-          );
           const currentTime = Date.now();
           const elapsed = (currentTime - startTime.value) / 1e3;
           progress.value = Math.round(
@@ -101,19 +106,34 @@ const _sfc_main = {
           estimatedTimeRemaining.value = remainingBytes / bytesPerSecond;
         },
         preserveScroll: true,
-        // Prevent scrolling on submission
         onFinish: () => {
           uploading.value = false;
           progress.value = 0;
           fileInput.value.value = "";
           form.reset();
+          form.files = [];
           success.value = true;
           loading.value = false;
           emit("upload-success", []);
           processingTime.value = (Date.now() - startTime.value) / 1e3;
+        },
+        onError: (errors) => {
+          error.value = Object.values(errors).flat().join(" ");
+          loading.value = false;
+          uploading.value = false;
         }
       });
     };
+    watch(
+      () => isSameAsPassword.value,
+      // Watching the reactive variable
+      (newValue) => {
+        if (newValue) {
+          form.passphrase = "";
+          form.nonce = "";
+        }
+      }
+    );
     return (_ctx, _push, _parent, _attrs) => {
       _push(ssrRenderComponent(_sfc_main$1, _attrs, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
@@ -122,16 +142,22 @@ const _sfc_main = {
             _push2(ssrRenderComponent(_sfc_main$2, null, {
               default: withCtx((_2, _push3, _parent3, _scopeId2) => {
                 if (_push3) {
-                  _push3(`File Upload`);
+                  _push3(` Upload (Unggah) `);
                 } else {
                   return [
-                    createTextVNode("File Upload")
+                    createTextVNode(" Upload (Unggah) ")
                   ];
                 }
               }),
               _: 1
             }, _parent2, _scopeId));
-            _push2(`<div class="flex h-screen w-full flex-col"${_scopeId}><div class="flex flex-col gap-8 overflow-auto md:flex-row"${_scopeId}><div class="flex flex-1 flex-col gap-4"${_scopeId}><label class="input"${_scopeId}><span class="label min-w-24"${_scopeId}>Passphrase</span><input type="text" id="passphrase"${ssrRenderAttr("value", unref(form).passphrase)}${ssrIncludeBooleanAttr(!unref(form).files.length) ? " disabled" : ""} placeholder=". . . ."${_scopeId}></label><label class="input"${_scopeId}><span class="label min-w-24"${_scopeId}>Nonce</span><input class="" type="text" id="nonce"${ssrRenderAttr("value", unref(form).nonce)}${ssrIncludeBooleanAttr(!unref(form).files.length) ? " disabled" : ""} placeholder=". . . ."${_scopeId}></label><input type="file" multiple class="file-input file-input-bordered"${_scopeId}><button class="btn btn-primary w-fit"${ssrIncludeBooleanAttr(unref(form).files.length === 0 || uploading.value) ? " disabled" : ""}${_scopeId}>${ssrInterpolate(uploading.value ? "Uploading..." : "Upload & Encrypt")}</button><div class="my-4 flex-1"${_scopeId}><div class="bg-base-300 min-h-48 w-full rounded-lg p-4"${_scopeId}><div class="flex flex-col"${_scopeId}><div class="mb-4 flex items-center gap-2"${_scopeId}><div class="badge font-bold"${_scopeId}>Output:</div></div><div class="flex flex-1 flex-col justify-between md:flex-row"${_scopeId}><div class="flex flex-col gap-4"${_scopeId}><div${_scopeId}><span${_scopeId}>${ssrInterpolate(progress.value === 0 ? "Tidak ada proses.." : progress.value < 100 ? "Mengunggah berlangsung.." : "Selesai mengunggah..")}</span>`);
+            _push2(`<div class="flex h-screen w-full flex-col"${_scopeId}><div class="flex flex-col gap-8 overflow-auto md:flex-row"${_scopeId}><div class="flex flex-1 flex-col gap-5 pt-2 pl-2"${_scopeId}><label class="input"${_scopeId}><span class="label min-w-24"${_scopeId}>Passphrase</span><input type="text" id="passphrase"${ssrRenderAttr("value", unref(form).passphrase)}${ssrIncludeBooleanAttr(
+              unref(form).files.length === 0 || isSameAsPassword.value
+            ) ? " disabled" : ""} placeholder=". . . ." required${_scopeId}></label><label class="input"${_scopeId}><span class="label min-w-24"${_scopeId}>Nonce</span><input type="text" id="nonce"${ssrRenderAttr("value", unref(form).nonce)}${ssrIncludeBooleanAttr(
+              unref(form).files.length === 0 || isSameAsPassword.value
+            ) ? " disabled" : ""} placeholder=". . . ." required${_scopeId}></label><input type="file" multiple class="file-input file-input-bordered"${_scopeId}><div class="form-control"${_scopeId}><label class="label cursor-pointer gap-4"${_scopeId}><span class="label-text"${_scopeId}>Samakan dengan password akun</span><input type="checkbox" checked="checked" class="checkbox"${ssrIncludeBooleanAttr(Array.isArray(isSameAsPassword.value) ? ssrLooseContain(isSameAsPassword.value, null) : isSameAsPassword.value) ? " checked" : ""}${_scopeId}></label></div><div class="flex gap-4"${_scopeId}><button class="btn btn-accent w-fit"${ssrIncludeBooleanAttr(unref(form).files.length === 0) ? " disabled" : ""}${_scopeId}> Upload </button><button class="btn btn-primary w-fit"${ssrIncludeBooleanAttr(
+              unref(form).files.length === 0 || !isSameAsPassword.value && (unref(form).passphrase === "" || unref(form).nonce === "")
+            ) ? " disabled" : ""}${_scopeId}>${ssrInterpolate(uploading.value ? "Uploading..." : "Upload & Encrypt")}</button></div><div class="my-4 flex-1"${_scopeId}><div class="bg-base-300 min-h-48 w-full rounded-lg p-4"${_scopeId}><div class="flex flex-col"${_scopeId}><div class="mb-4 flex items-center gap-2"${_scopeId}><div class="badge font-bold"${_scopeId}>Output:</div></div><div class="flex flex-1 flex-col justify-between md:flex-row"${_scopeId}><div class="flex flex-col gap-4"${_scopeId}><div${_scopeId}><span${_scopeId}>${ssrInterpolate(progress.value === 0 ? "Tidak ada proses.." : progress.value < 100 ? "Mengunggah berlangsung.." : "Selesai mengunggah..")}</span>`);
             if (loading.value) {
               _push2(`<span class="loading loading-spinner text-primary ml-4"${_scopeId}></span>`);
             } else {
@@ -161,21 +187,22 @@ const _sfc_main = {
               createVNode(unref(Head), { title: "Upload File" }),
               createVNode(_sfc_main$2, null, {
                 default: withCtx(() => [
-                  createTextVNode("File Upload")
+                  createTextVNode(" Upload (Unggah) ")
                 ]),
                 _: 1
               }),
               createVNode("div", { class: "flex h-screen w-full flex-col" }, [
                 createVNode("div", { class: "flex flex-col gap-8 overflow-auto md:flex-row" }, [
-                  createVNode("div", { class: "flex flex-1 flex-col gap-4" }, [
+                  createVNode("div", { class: "flex flex-1 flex-col gap-5 pt-2 pl-2" }, [
                     createVNode("label", { class: "input" }, [
                       createVNode("span", { class: "label min-w-24" }, "Passphrase"),
                       withDirectives(createVNode("input", {
                         type: "text",
                         id: "passphrase",
                         "onUpdate:modelValue": ($event) => unref(form).passphrase = $event,
-                        disabled: !unref(form).files.length,
-                        placeholder: ". . . ."
+                        disabled: unref(form).files.length === 0 || isSameAsPassword.value,
+                        placeholder: ". . . .",
+                        required: ""
                       }, null, 8, ["onUpdate:modelValue", "disabled"]), [
                         [vModelText, unref(form).passphrase]
                       ])
@@ -183,12 +210,12 @@ const _sfc_main = {
                     createVNode("label", { class: "input" }, [
                       createVNode("span", { class: "label min-w-24" }, "Nonce"),
                       withDirectives(createVNode("input", {
-                        class: "",
                         type: "text",
                         id: "nonce",
                         "onUpdate:modelValue": ($event) => unref(form).nonce = $event,
-                        disabled: !unref(form).files.length,
-                        placeholder: ". . . ."
+                        disabled: unref(form).files.length === 0 || isSameAsPassword.value,
+                        placeholder: ". . . .",
+                        required: ""
                       }, null, 8, ["onUpdate:modelValue", "disabled"]), [
                         [vModelText, unref(form).nonce]
                       ])
@@ -201,11 +228,31 @@ const _sfc_main = {
                       class: "file-input file-input-bordered",
                       onChange: handleFileSelect
                     }, null, 544),
-                    createVNode("button", {
-                      onClick: withModifiers(uploadFile, ["prevent"]),
-                      class: "btn btn-primary w-fit",
-                      disabled: unref(form).files.length === 0 || uploading.value
-                    }, toDisplayString(uploading.value ? "Uploading..." : "Upload & Encrypt"), 9, ["disabled"]),
+                    createVNode("div", { class: "form-control" }, [
+                      createVNode("label", { class: "label cursor-pointer gap-4" }, [
+                        createVNode("span", { class: "label-text" }, "Samakan dengan password akun"),
+                        withDirectives(createVNode("input", {
+                          type: "checkbox",
+                          checked: "checked",
+                          class: "checkbox",
+                          "onUpdate:modelValue": ($event) => isSameAsPassword.value = $event
+                        }, null, 8, ["onUpdate:modelValue"]), [
+                          [vModelCheckbox, isSameAsPassword.value]
+                        ])
+                      ])
+                    ]),
+                    createVNode("div", { class: "flex gap-4" }, [
+                      createVNode("button", {
+                        onClick: withModifiers(($event) => uploadFile(), ["prevent"]),
+                        class: "btn btn-accent w-fit",
+                        disabled: unref(form).files.length === 0
+                      }, " Upload ", 8, ["onClick", "disabled"]),
+                      createVNode("button", {
+                        onClick: withModifiers(($event) => uploadFile(), ["prevent"]),
+                        class: "btn btn-primary w-fit",
+                        disabled: unref(form).files.length === 0 || !isSameAsPassword.value && (unref(form).passphrase === "" || unref(form).nonce === "")
+                      }, toDisplayString(uploading.value ? "Uploading..." : "Upload & Encrypt"), 9, ["onClick", "disabled"])
+                    ]),
                     createVNode("div", { class: "my-4 flex-1" }, [
                       createVNode("div", { class: "bg-base-300 min-h-48 w-full rounded-lg p-4" }, [
                         createVNode("div", { class: "flex flex-col" }, [

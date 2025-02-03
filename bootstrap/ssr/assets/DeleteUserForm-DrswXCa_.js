@@ -1,7 +1,8 @@
 import { mergeProps, useSSRContext, ref, watch, onMounted, onUnmounted, computed, withCtx, createTextVNode, unref, createVNode, withKeys, nextTick } from "vue";
 import { ssrRenderAttrs, ssrRenderSlot, ssrRenderStyle, ssrRenderClass, ssrRenderComponent } from "vue/server-renderer";
 import { _ as _export_sfc } from "./_plugin-vue_export-helper-1tPrXgE0.js";
-import { _ as _sfc_main$4, a as _sfc_main$5, b as _sfc_main$6 } from "./TextInput-Dg4nfphw.js";
+import { _ as _sfc_main$6 } from "./InputError-D7Pvlg8p.js";
+import { _ as _sfc_main$4, a as _sfc_main$5 } from "./TextInput-C_DOY57T.js";
 import { useForm } from "@inertiajs/vue3";
 const _sfc_main$3 = {};
 function _sfc_ssrRender(_ctx, _push, _parent, _attrs) {
@@ -158,7 +159,7 @@ const _sfc_main = {
       form.reset();
     };
     return (_ctx, _push, _parent, _attrs) => {
-      _push(`<section${ssrRenderAttrs(mergeProps({ class: "space-y-6" }, _attrs))}><header><h2 class="text-lg font-medium">Delete Account</h2><p class="mt-1 text-sm"> Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain. </p></header>`);
+      _push(`<section${ssrRenderAttrs(mergeProps({ class: "space-y-6" }, _attrs))}><header><h2 class="text-lg font-medium">Delete Account</h2></header>`);
       _push(ssrRenderComponent(DangerButton, { onClick: confirmUserDeletion }, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
