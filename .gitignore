@@ -28,3 +28,12 @@ Homestead.json
 .env.production
 .phpactor.json
 auth.json
+
+storage/app/temp/chunks/*
+
+/.phpunit.cache
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
