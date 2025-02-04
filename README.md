@@ -14,6 +14,7 @@ Adalah aplikasi kriptografi berbasis web menggunakan algoritma [ChaCha20-Poly130
 2. Lakukan migrasi database `php artisan migrate`
 3. Jalankan server `composer run dev`
 
+Note: Jika ada masalah upload pastikan ukuran file tidak melebihi [upload_max_filesize](https://www.php.net/manual/en/ini.core.php#ini.upload-max-filesize) yang ada di `php.ini` 
 
 ## Dependencies
 - Laravel v11.0
